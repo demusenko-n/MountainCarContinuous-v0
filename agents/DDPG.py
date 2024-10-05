@@ -14,7 +14,7 @@ class DDPG():
         self.action_size = task.action_space.shape[0]
         self.action_high = task.action_space.high
         self.action_low = task.action_space.low
-        
+
 
         # Initialize Actor (policy) models
         self.actor_local = Actor(self.state_size,self.action_size,self.action_low,self.action_high)
@@ -36,7 +36,7 @@ class DDPG():
 
         # Replay buffer
 
-        self.buffer_size = 100000 
+        self.buffer_size = 100000
         self.batch_size = 64
         self.memory = ReplayBuffer(self.buffer_size,self.batch_size)
 
@@ -59,7 +59,7 @@ class DDPG():
         if len(self.memory) > self.batch_size:
             experiences = self.memory.sample()
             self.learn(experiences)
-        
+
         # Roll over state
         self.last_state = next_state
 
@@ -73,7 +73,7 @@ class DDPG():
         # Convert experience tuples to separate arrays for each element
 
         states = np.vstack([e.state for e in experiences if e is not None]).astype(np.float32).reshape(-1,self.state_size)
-        actions = np.array([e.action for e in experiences if e is not None]).astype(np.float32).reshape(-1,self.action_size) 
+        actions = np.array([e.action for e in experiences if e is not None]).astype(np.float32).reshape(-1,self.action_size)
         next_states = np.vstack([e.next_state for e in experiences if e is not None]).astype(np.float32).reshape(-1,self.state_size)
         rewards = np.array([e.reward for e in experiences if e is not None]).astype(np.float32).reshape(-1,1)
         dones = np.array([e.done for e in experiences if e is not None]).astype(np.uint8).reshape(-1,1)
@@ -89,7 +89,7 @@ class DDPG():
         # Train actor model (local)
         action_gradients = np.reshape(self.critic_local.get_action_gradients([states,actions,0]),
         [-1,self.action_size])
-        self.actor_local.train_fn([states,action_gradients,1])
+        self.actor_local.train(states,action_gradients)
 
         # Soft-update target models
         self.soft_update(self.actor_local.model,self.actor_target.model)
@@ -114,10 +114,10 @@ class DDPG():
         action = self.actor_local.model.predict(state)[0]
         return list(action)
 
-        
 
 
-    
+
+
 
 
 
